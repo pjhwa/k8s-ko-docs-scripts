@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 
 if [ ! -d "content" ]; then
 	echo "You should execute this script from website/ directory."
@@ -7,7 +7,7 @@ if [ ! -d "content" ]; then
 fi
 
 OUTPUT=$(dirname `pwd`)
-CURDIR=$(`pwd`)
+CURDIR=$PWD
 
 # Remove the previous output files
 rm $OUTPUT/redirects.txt
@@ -50,3 +50,6 @@ do
   echo "======================================================" >> $OUTPUT/brokenlinks-rd.txt
   grep -nir "($kofile[)#]" docs >> $OUTPUT/brokenlinks-rd.txt
 done
+
+echo "Check the brokenlinks.txt and brokenlinks-rd.txt files in $OUTPUT directory."
+exit
