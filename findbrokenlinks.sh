@@ -38,7 +38,8 @@ do
     echo "" >> $OUTPUT/brokenlinks.txt
 
     echo "------ Anchor of /ko/$kofile ::" >> $OUTPUT/brokenlinks.txt
-    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/)$//g' | awk -F'#' '{print $1}')
+    #URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/)$//g' | awk -F'#' '{print $1}')
+    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | awk -F'[\\(\\)]' '{print $2}' | awk -F'#' '{print $1}')
     if [ "$URLFILE" == "docs/concept/" ] || [ "$URLFILE" == "docs/contribute/" ] || [ "$URLFILE" == "docs/tasks/" ] || [ "$URLFILE" == "docs/setup/" ] || [ "$URLFILE" == "docs/reference/" ] || [ "$URLFILE" == "docs/tutorials/" ]; then
         URLFILE2=$(echo $URLFILE | sed -e 's/$/_index.md/')
     else
@@ -85,11 +86,13 @@ do
 
     echo "" >> $OUTPUT/brokenlinks-rd.txt
     echo "------ /ko/$TFF @$LNO ::" >> $OUTPUT/brokenlinks-rd.txt
-    awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^/\//g' -e 's/)$//g' >> $OUTPUT/brokenlinks-rd.txt
+    #awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^/\//g' -e 's/)$//g' >> $OUTPUT/brokenlinks-rd.txt
+    awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | awk -F'[\\(\\)]' '{print $2}' >> $OUTPUT/brokenlinks-rd.txt
     echo "" >> $OUTPUT/brokenlinks-rd.txt
 
     echo "------ Anchor of /ko$KODIR ::" >> $OUTPUT/brokenlinks-rd.txt
-    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^\///' -e 's/)$//g' | awk -F'#' '{print $1}')
+    #URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^\///' -e 's/)$//g' | awk -F'#' '{print $1}')
+    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | awk -F'[\\(\\)]' '{print $2}' | awk -F'#' '{print $1}')
     if [ "$URLFILE" == "docs/concept/" ] || [ "$URLFILE" == "docs/contribute/" ] || [ "$URLFILE" == "docs/tasks/" ] || [ "$URLFILE" == "docs/setup/" ] || [ "$URLFILE" == "docs/reference/" ] || [ "$URLFILE" == "docs/tutorials/" ]; then
     	KODIR2=$(echo $KODIR | sed -e 's/^\///' -e 's/$/_index.md/')
     else
