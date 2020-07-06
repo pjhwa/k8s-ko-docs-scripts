@@ -10,11 +10,15 @@ OUTPUT=$(dirname `pwd`)
 CURDIR=$PWD
 
 # Remove the previous output files
-rm $OUTPUT/redirects.txt
-rm $OUTPUT/brokenlinks*.txt
+rm $OUTPUT/redirects.txt 2> /dev/null
+rm $OUTPUT/brokenlinks*.txt 2> /dev/null
 
 cd content/ko
-FILELIST=$(find docs -name '*.md' -type f -print | sed -e 's/^.\///g' -e 's/.md$/\//g' -e 's/_index\///g')
+
+find docs -name '*.md' -type f -print > /tmp/fbl$$
+FILELIST=$(cat /tmp/fbl$$ | sed -e 's/^.\///g' -e 's/.md$/\//g' -e 's/_index\///g')
+
+echo "Finding document links..."
 
 for kofile in $FILELIST
 do
@@ -34,25 +38,33 @@ do
 
     echo "" >> $OUTPUT/brokenlinks.txt
     echo "------ /ko/$TFF @$LNO ::" >> $OUTPUT/brokenlinks.txt
-    awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^/\//g' -e 's/)$//g' >> $OUTPUT/brokenlinks.txt
+    #awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^/\//g' -e 's/)$//g' >> $OUTPUT/brokenlinks.txt
+    awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed 's/.*](//;s/).*//' | sed -e 's/^/\//g' -e 's/)$//g' >> $OUTPUT/brokenlinks.txt
     echo "" >> $OUTPUT/brokenlinks.txt
 
     echo "------ Anchor of /ko/$kofile ::" >> $OUTPUT/brokenlinks.txt
     #URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/)$//g' | awk -F'#' '{print $1}')
-    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | awk -F'[\\(\\)]' '{print $2}' | awk -F'#' '{print $1}')
+    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed 's/.*](//;s/).*//' | sed -e 's/^\///' | awk -F'#' '{print $1}')
     if [ "$URLFILE" == "docs/concept/" ] || [ "$URLFILE" == "docs/contribute/" ] || [ "$URLFILE" == "docs/tasks/" ] || [ "$URLFILE" == "docs/setup/" ] || [ "$URLFILE" == "docs/reference/" ] || [ "$URLFILE" == "docs/tutorials/" ]; then
-        URLFILE2=$(echo $URLFILE | sed -e 's/$/_index.md/')
+        URLFILE2=$(echo $URLFILE | sed -e 's/^\///' -e 's/$/_index.md/')
     else
-        URLFILE2=$(echo $URLFILE | sed -e 's/\/$/.md/')
+        URLFILE2=$(echo $URLFILE | sed -e 's/^\///' -e 's/\/$/.md/')
     fi
     grep "^#" $URLFILE2 | egrep -v "{{%|^#include" | awk '{print tolower($0)}' | sed -e 's/[[:blank:]]$//g' | sed -e 's/^.#* /#/' -e 's/ {#/::{#/' -e 's/ /-/g' -e 's/(/-/g' -e 's/)$//g' -e 's/)/-/g' -e 's/?$//' >> $OUTPUT/brokenlinks.txt
     echo "-------------------------------------------------------------------------------------------" >> $OUTPUT/brokenlinks.txt
   done
 done
 
+echo "done."
+echo ""
+
+
 # For redirects
 
-FILELIST_RD=$(find docs -name '*.md' -type f -print | sed -e 's/^.\///g' | egrep -v "_index" | sed -e 's/.md$/\//g')
+FILELIST_RD=$(cat /tmp/fbl$$ | sed -e 's/^.\///g' | egrep -v "_index" | sed -e 's/.md$/\//g')
+NOFILES_RD=$(cat /tmp/fbl$$ | wc -l)
+
+echo "Finding document links with _redirects..."
 
 for kofile in $FILELIST_RD
 do
@@ -87,12 +99,13 @@ do
     echo "" >> $OUTPUT/brokenlinks-rd.txt
     echo "------ /ko/$TFF @$LNO ::" >> $OUTPUT/brokenlinks-rd.txt
     #awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^/\//g' -e 's/)$//g' >> $OUTPUT/brokenlinks-rd.txt
-    awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | awk -F'[\\(\\)]' '{print $2}' >> $OUTPUT/brokenlinks-rd.txt
+    awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed 's/.*](//;s/).*//' | sed -e 's/^\///' >> $OUTPUT/brokenlinks-rd.txt
+    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "(/$kofile#" | sed 's/.*](//;s/).*//' | sed -e 's/^\///' | awk -F'#' '{print $1}')
     echo "" >> $OUTPUT/brokenlinks-rd.txt
 
     echo "------ Anchor of /ko$KODIR ::" >> $OUTPUT/brokenlinks-rd.txt
     #URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed -n "s/^.*(\/\s*\(\S*)\).*$/\1/p" | sed -e 's/^\///' -e 's/)$//g' | awk -F'#' '{print $1}')
-    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | awk -F'[\\(\\)]' '{print $2}' | awk -F'#' '{print $1}')
+    URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep "($RDDIR#" | sed 's/.*](//;s/).*//' | sed -e 's/^\///' | awk -F'#' '{print $1}')
     if [ "$URLFILE" == "docs/concept/" ] || [ "$URLFILE" == "docs/contribute/" ] || [ "$URLFILE" == "docs/tasks/" ] || [ "$URLFILE" == "docs/setup/" ] || [ "$URLFILE" == "docs/reference/" ] || [ "$URLFILE" == "docs/tutorials/" ]; then
     	KODIR2=$(echo $KODIR | sed -e 's/^\///' -e 's/$/_index.md/')
     else
@@ -102,6 +115,11 @@ do
     echo "-------------------------------------------------------------------------------------------" >> $OUTPUT/brokenlinks-rd.txt
   done
 done
+
+echo "done."
+echo ""
+
+rm /tmp/fbl$$ 2> /dev/null
 
 echo "Check the brokenlinks.txt and brokenlinks-rd.txt files in $OUTPUT directory."
 exit
