@@ -1,6 +1,6 @@
 # k8s-ko-docs-scripts
 
-한글화 번역 작업을 위한 스크립트입니다.
+쿠버네티스 한글화 번역 작업을 위한 스크립트입니다.
 
 ## For maintaining translated documents
 
