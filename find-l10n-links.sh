@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 
 if [ ! -d "content" ]; then
         echo "ERROR::"
@@ -78,7 +78,7 @@ do
       echo "" >> $OUTPUT/foundlinks-$1.txt
   
       echo "------ Select one of the following anchors of /$1/$kofile/ ::" >> $OUTPUT/foundlinks-$1.txt
-      URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep -E "\(/$kofile(/#|#)" | sed 's/.*](//;s/).*//' | sed -e 's/^\///' | awk -F'#' '{print $1}' | sed -e 's/^\///' -e 's/\/$/.md/')
+      URLFILE=$(awk -v a=$LNO 'NR==a' $TFF | grep -E "\(/$kofile(/#|#)" | sed -e 's/.*](//;s/).*//' -e 's/^\///' | awk -F'#' '{print $1}' | sed -e 's/\/$//' -e 's/$/.md/')
 
       grep "^#" $URLFILE | egrep -v "{{%|^#include" | awk '{print tolower($0)}' | sed -e 's/[[:blank:]]$//g' | sed -e 's/^.#* /#/' -e 's/ {#/::{#/' -e 's/ /-/g' -e 's/(/-/g' -e 's/)$//g' -e 's/)/-/g' -e 's/?$//' >> $OUTPUT/foundlinks-$1.txt
       echo "-------------------------------------------------------------------------------------------" >> $OUTPUT/foundlinks-$1.txt
